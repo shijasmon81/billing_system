@@ -75,7 +75,7 @@ BILLING_SYSTEM/
 *   Handles remainders if exact change not possible
     
 
-### 🖼 Live Invoice Preview (AJAX)
+### 🖼 Live Invoice Preview 
 
 *   Clicking **Generate Bill** does NOT redirect
     
