@@ -185,16 +185,12 @@ SQLite DB auto-created at:
 
 Seeded via curd.seed\_data() on startup.
 
-📌 Future Enhancements (optional)
+📌 Future Enhancements 
 ---------------------------------
 
 *   Printable PDF invoices
     
 *   Product management UI
-    
-*   GST invoice format
-    
-*   Customer portal
     
 *   Real admin dashboard
     
