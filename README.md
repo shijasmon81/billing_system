@@ -23,7 +23,31 @@ This app allows you to:
 📂 Folder Structure
 -------------------
 
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   BILLING_SYSTEM/  │  ├── app/  │   ├── __init__.py  │   ├── curd.py              # Business logic (product lines, totals, change calc)  │   ├── db.py                # DB engine + session + initialization  │   ├── models.py            # SQLModel ORM models  │   └── send_mail.py         # REAL email sending logic (SMTP)  │  ├── database/  │   └── billing.db           # SQLite DB  │  ├── static/  │   └── style.css            # Styles for billing page + invoice  │  ├── templates/  │   ├── billing.html         # Billing UI + invoice preview panel  │   ├── invoice.html         # Invoice HTML template  │   └── invoice_email.html   # Email-friendly HTML invoice  │  ├── main.py                  # FastAPI app entrypoint  ├── requirements.txt  └── README.md   `
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   
+BILLING_SYSTEM/
+│
+├── app/
+│   ├── __init__.py
+│   ├── curd.py              # Business logic (product lines, totals, change calc)
+│   ├── db.py                # DB engine + session + initialization
+│   ├── models.py            # SQLModel ORM models
+│   └── send_mail.py         # REAL email sending logic (SMTP)
+│
+├── database/
+│   └── billing.db           # SQLite DB
+│
+├── static/
+│   └── style.css            # Styles for billing page + invoice
+│
+├── templates/
+│   ├── billing.html         # Billing UI + invoice preview panel
+│   ├── invoice.html         # Invoice HTML template
+│   └── invoice_email.html   # Email-friendly HTML invoice
+│
+├── main.py                  # FastAPI app entrypoint
+├── requirements.txt
+└── README.md
+`
 
 🚀 Features
 -----------
