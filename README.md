@@ -24,6 +24,7 @@ This app allows you to:
 -------------------
 
 Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   
+
 BILLING_SYSTEM/
 │
 ├── app/
@@ -47,7 +48,7 @@ BILLING_SYSTEM/
 ├── main.py                  # FastAPI app entrypoint
 ├── requirements.txt
 └── README.md
-`
+
 
 🚀 Features
 -----------
