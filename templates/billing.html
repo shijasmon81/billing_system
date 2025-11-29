@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+<head>
+  <title>Billing Page</title>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+
+
+<body>
+  <h2>Billing Page</h2>
+
+  <div class="page-layout">
+    <div class="left-panel">
+      <form id="billForm" method="post" action="/generate">
+        Customer Email:
+        <input type="email" id="custEmail" name="customer_email" required/>
+        <br/><br/>
+
+        <div id="lines">
+          <div class="line">
+            <select class="product_select">
+              <option value="">-- select product --</option>
+              {% for p in products %}
+              <option value="{{ p.product_id }}">{{ p.product_id }} - {{ p.name }} (₹{{ "%.2f"|format(p.price) }})</option>
+              {% endfor %}
+            </select>
+
+            Qty: <input type="number" class="qty" value="1" min="1"/>
+            <button type="button" onclick="removeLine(this)">Remove</button>
+          </div>
+        </div>
+
+        <button type="button" onclick="addLine()">Add New</button>
+
+        <hr/>
+
+        <div class="denoms">
+          <h4>Denominations (shop counts)</h4>
+          {% for d in denoms %}
+            {{ d.value }} : <input type="number" class="denom_count" data-value="{{ d.value }}" value="{{ d.count }}"/><br/>
+          {% endfor %}
+        </div>
+
+        <br/>
+        Cash paid by customer:
+        <input type="number" step="0.01" name="paid_amount" required/>
+
+        <br/><br/>
+        <input type="hidden" name="lines_json" id="lines_json"/>
+
+        <div class="btn-row">
+          <button type="button" onclick="cancelForm()">Cancel</button>
+
+          <button type="button" onclick="submitAndShowInvoice()">Generate Bill</button>
+
+          <button type="button" onclick="viewPreviousModal()">View Previous Purchases</button>
+        </div>
+      </form>
+
+     
+      {% if previous_purchases %}
+      <div id="previousPurchases" style="margin-top:20px;">
+        <h3>Previous purchases for {{ previous_purchases[0].customer_email }}</h3>
+        <div class="prev-list">
+          <table class="prev-table">
+            <thead>
+              <tr><th>Invoice</th><th>Date</th><th style="text-align:right">Total (₹)</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              {% for p in previous_purchases %}
+              <tr>
+                <td>#{{ p.id }}</td>
+                <td>{{ p.created_at.strftime("%Y-%m-%d %H:%M") if p.created_at else p.created_at }}</td>
+                <td style="text-align:right">{{ "%.2f"|format(p.rounded_total) }}</td>
+                <td><a href="/purchases/{{ p.id }}" target="_blank">View invoice</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+    </div> 
+    
+    <div class="right-panel">
+      <h3>Invoice</h3>
+      <div id="invoicePreview" class="invoice-preview-box">
+        <p>No invoice generated yet.</p>
+      </div>
+    </div>
+  </div> 
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" id="modalContent" role="document" aria-live="polite">
+      <div class="modal-header">
+        <h3>Previous purchases</h3>
+        <div>
+          <button id="openInNewBtn" style="display:none">🔗</button>
+          <button id="closeModalBtn">✖</button>
+        </div>
+      </div>
+      <div id="modalBody"><p style="color:#666">Loading...</p></div>
+    </div>
+  </div>
+
+<script>
+
+function addLine() {
+  const container = document.getElementById('lines');
+  const div = document.createElement('div');
+  div.className = 'line';
+  div.innerHTML = document.querySelector('.line').innerHTML;
+  container.appendChild(div);
+}
+function removeLine(btn){
+  const line = btn.closest('.line');
+  if(line) line.remove();
+}
+
+
+function prepareForm(){
+  const selects = document.querySelectorAll('.product_select');
+  const qts = document.querySelectorAll('.qty');
+  const lines = [];
+  for(let i=0;i<selects.length;i++){
+    const pid = selects[i].value;
+    const qty = qts[i].value;
+    if(pid && qty>0) lines.push({product_id: pid, quantity: qty});
+  }
+  document.getElementById('lines_json').value = JSON.stringify(lines);
+}
+
+function cancelForm(){
+  document.getElementById('billForm').reset();
+  const firstLine = `
+    <select class="product_select">
+      <option value="">-- select product --</option>
+      {% for p in products %}
+      <option value="{{ p.product_id }}">{{ p.product_id }} - {{ p.name }} (₹{{ "%.2f"|format(p.price) }})</option>
+      {% endfor %}
+    </select>
+    Qty: <input type="number" class="qty" value="1" min="1"/>
+    <button type="button" onclick="removeLine(this)">Remove</button>
+  `;
+  document.getElementById('lines').innerHTML = `<div class="line">${firstLine}</div>`;
+  document.getElementById('invoicePreview').innerHTML = '<p>No invoice generated yet.</p>';
+}
+
+
+async function submitAndShowInvoice(){
+  const form = document.getElementById('billForm');
+  prepareForm();
+
+  const preview = document.getElementById('invoicePreview');
+  preview.innerHTML = '<p style="color:#666">Generating invoice...</p>';
+
+  try {
+    const resp = await fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form)
+    });
+
+    if(!resp.ok){
+      const text = await resp.text();
+      preview.innerHTML = `<p style="color:red">Error ${resp.status}</p><pre>${escapeHtml(text).slice(0,2000)}</pre>`;
+      return;
+    }
+
+    const html = await resp.text();
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    
+    const invoiceElement = doc.querySelector('#invoice') || doc.querySelector('.invoice') || doc.body;
+    
+    preview.innerHTML = invoiceElement.innerHTML || html;
+  } catch (err) {
+    preview.innerHTML = `<p style="color:red">Error generating invoice: ${err.message || err}</p>`;
+  }
+}
+
+
+function escapeHtml(unsafe) {
+  return unsafe
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+
+const backdrop = document.getElementById('modalBackdrop');
+const modalBody = document.getElementById('modalBody');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const openInNewBtn = document.getElementById('openInNewBtn');
+
+function openModal(){ backdrop.style.display = 'flex'; backdrop.setAttribute('aria-hidden','false'); }
+function closeModal(){ backdrop.style.display = 'none'; backdrop.setAttribute('aria-hidden','true'); modalBody.innerHTML = '<p style="color:#666">Loading...</p>'; }
+
+closeModalBtn.addEventListener('click', closeModal);
+backdrop.addEventListener('click', (e)=>{ if(e.target===backdrop) closeModal(); });
+
+async function viewPreviousModal(){
+  const email = document.getElementById('custEmail').value.trim();
+  if(!email){ alert('Please enter a customer email first.'); return; }
+  const url = `/customers/${encodeURIComponent(email)}/purchases`;
+
+  modalBody.innerHTML = '<p style="color:#666">Loading previous purchases...</p>';
+  openModal();
+
+  openInNewBtn.style.display = 'inline-block';
+  openInNewBtn.onclick = ()=> window.open(url,'_blank');
+
+  try {
+    const resp = await fetch(url);
+    if(!resp.ok){
+      modalBody.innerHTML = `<p style="color:red">Failed to load (status ${resp.status})</p>`;
+      return;
+    }
+    const html = await resp.text();
+    const frag = extractPreviousPurchasesFragment(html);
+    modalBody.innerHTML = frag || '<p>No previous purchases found.</p>';
+  } catch (err) {
+    modalBody.innerHTML = `<p style="color:red">Error loading purchases: ${err.message || err}</p>`;
+  }
+}
+
+function extractPreviousPurchasesFragment(fullHtml){
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fullHtml,'text/html');
+    const frag = doc.getElementById('previousPurchases');
+    return frag ? frag.outerHTML : null;
+  } catch (e) { return null; }
+}
+</script>
+</body>
+</html>

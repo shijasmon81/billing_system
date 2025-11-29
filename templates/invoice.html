@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Invoice</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+
+<body class="invoice-body">
+
+<div class="invoice-container">
+
+  <div class="invoice-header">
+    <h2>Invoice for {{ purchase.customer_email }}</h2>
+  </div>
+
+  <p class="invoice-meta">
+    Purchase ID: {{ purchase.id }} |
+    Date: {{ purchase.created_at }}
+  </p>
+
+  <table class="invoice-table">
+    <tr>
+      <th>Product ID</th>
+      <th>Name</th>
+      <th>Unit Price</th>
+      <th>Qty</th>
+      <th>Total</th>
+      <th>Tax</th>
+      <th>Total Payable</th>
+    </tr>
+
+    {% for it in items %}
+    <tr>
+      <td>{{ it.product_id }}</td>
+      <td>{{ it.name }}</td>
+      <td>{{ "%.2f"|format(it.unit_price) }}</td>
+      <td>{{ it.quantity }}</td>
+      <td>{{ "%.2f"|format(it.total_price) }}</td>
+      <td>{{ "%.2f"|format(it.tax_amount) }}</td>
+      <td>{{ "%.2f"|format(it.total_payable)}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="invoice-totals">
+    <p>Total without tax: ₹{{ "%.2f"|format(purchase.total_without_tax) }}</p>
+    <p>Total tax: ₹{{ "%.2f"|format(purchase.total_tax) }}</p>
+    <p>Total payable: ₹{{ "%.2f"|format(purchase.total_payable) }}</p>
+    <p>Rounded total: ₹{{ "%.2f"|format(purchase.rounded_total) }}</p>
+    <p>Paid: ₹{{ "%.2f"|format(paid) }}</p>
+    <p>Change due: ₹{{ "%.2f"|format(change_due) }}</p>
+  </div>
+  <hr/>
+  
+  <div class="invoice-denoms">
+    <h4>Balance Denominations</h4>
+    {% if denom_map %}
+      <ul>
+        {% for v,c in denom_map.items() %}
+          <ul>₹{{ v }} : {{ c }}</ul>
+        {% endfor %}
+      </ul>
+      {% if denom_remainder and denom_remainder > 0 %}
+        <p>Could not return ₹{{ denom_remainder }} with available denominations</p>
+      {% endif %}
+    {% else %}
+      <p>No change denominations computed.</p>
+    {% endif %}
+  </div>
+
+</div> 
+
+</body>
+</html>

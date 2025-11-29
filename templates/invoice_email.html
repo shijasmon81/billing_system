@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Invoice</title>
+  <style>
+    body.invoice-body {
+    font-family: Arial, sans-serif;
+    background: #fafafa;
+    padding: 20px;
+    color: #333;
+    }
+
+    .invoice-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 6px;
+        max-width: 900px;
+        margin: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .invoice-header {
+        margin-bottom: 20px;
+    }
+    
+    .invoice-header h2 {
+        margin: 0;
+    }
+    
+    .invoice-meta {
+        color: #555;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    .invoice-table th {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    .invoice-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    
+    .invoice-totals{
+        text-align: right;
+        margin-top: 10px;
+    }
+
+    .invoice-totals p {
+        margin: 4px 0;
+        font-size: 15px;
+    }    
+    
+    .invoice-preview-box table {
+        font-size: 14px;
+    }
+  </style>
+</head>
+
+<body class="invoice-body">
+
+<div class="invoice-container">
+
+  <div class="invoice-header">
+    <h2>Invoice</h2>
+  </div>
+
+  <p class="invoice-meta">
+    Purchase ID: {{ purchase.id }} |
+    Date: {{ purchase.created_at }}
+  </p>
+
+  <table class="invoice-table">
+    <tr>
+      <th>Product ID</th>
+      <th>Name</th>
+      <th>Unit Price</th>
+      <th>Qty</th>
+      <th>Total</th>
+      <th>Tax</th>
+      <th>Total Payable</th>
+    </tr>
+
+    {% for it in items %}
+    <tr>
+      <td>{{ it.product_id }}</td>
+      <td>{{ it.name }}</td>
+      <td>{{ "%.2f"|format(it.unit_price) }}</td>
+      <td>{{ it.quantity }}</td>
+      <td>{{ "%.2f"|format(it.total_price) }}</td>
+      <td>{{ "%.2f"|format(it.tax_amount) }}</td>
+      <td>{{ "%.2f"|format(it.total_payable)}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="invoice-totals">
+    <p>Total without tax: ₹{{ "%.2f"|format(purchase.total_without_tax) }}</p>
+    <p>Total tax: ₹{{ "%.2f"|format(purchase.total_tax) }}</p>
+    <p>Total payable: ₹{{ "%.2f"|format(purchase.total_payable) }}</p>
+    <p>Rounded total: ₹{{ "%.2f"|format(purchase.rounded_total) }}</p>
+  </div>
+
+</div> <!-- /invoice-container -->
+
+</body>
+</html>
